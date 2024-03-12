@@ -2,23 +2,23 @@
   <div id="app">
     <div class="block-1">
       <h2>Add Elements</h2>
-      <input v-model="newItem.name" placeholder="Name">
       <div class="slider-container">
-        <input type="range" v-model.number="newItem.price" min="0" max="500" step="50" @input="updateSliderValue">
+        <p>Установите цену товара:</p>
         <div class="slider-values">
           <div v-for="value in sliderValues" :key="value" :class="{ active: value === newItem.price }">{{ value }}</div>
+          <p>P</p>
         </div>
+        <input type="range" v-model.number="newItem.price" min="0" max="500" step="50" @input="updateSliderValue">
+      </div>
+      <div class="name-container">
+        <p class="counter">{{items.length + 1}}.</p>
+        <input v-model="newItem.name" placeholder="Name">
+        <div>{{newItem.price}} P</div>
       </div>
       <button @click="addItem" :disabled="!newItem.name.trim() || newItem.price === 0">Add</button>
     </div>
     <div class="block-2">
       <h2>Elements List</h2>
-      <ol>
-        <li v-for="(item, index) in items" :key="index">
-          {{ item.name }} - {{ item.price }}
-          <button v-if="index !== items.length - 1" @click="deleteItem(index)">Delete</button>
-        </li>
-      </ol>
       <div v-if="items.length > 0" class="last-item-container">
         <h3>Last Item</h3>
         <div class="slider-container">
@@ -27,6 +27,12 @@
         <p>{{ lastItem.name }} - {{ lastItem.price }}</p>
         <button @click="deleteItem(items.length - 1)">Delete</button>
       </div>
+      <ol>
+        <li v-for="(item, index) in items" :key="index">
+          {{ item.name }} - {{ item.price }}
+          <button v-if="index !== items.length" @click="deleteItem(index)">Delete</button>
+        </li>
+      </ol>
       <button @click="deleteAllItems">Delete All</button>
     </div>
   </div>
@@ -48,6 +54,20 @@ export default {
     for (let i = 0; i <= 500; i += 50) {
       this.sliderValues.push(i);
     }
+    const savedItems = JSON.parse(localStorage.getItem('items'));
+    if (savedItems) {
+      this.items = savedItems;
+      this.newItem.price = savedItems[savedItems.length - 1]?.price || 0;
+    }
+  },
+  watch: {
+    // Сохранить значения при каждом изменении
+    items: {
+      handler(items) {
+        localStorage.setItem('items', JSON.stringify(items));
+      },
+      deep: true
+    }
   },
   computed: {
     lastItem() {
@@ -57,9 +77,12 @@ export default {
   methods: {
     addItem() {
       if (this.newItem.name.trim() && this.newItem.price !== 0) {
-        this.items.push({ ...this.newItem });
+        const newItem = { ...this.newItem };
+        this.items.push(newItem);
         this.newItem.name = '';
         this.newItem.price = 0;
+        this.lastItem.price = newItem.price;
+        this.updateSliderValue();
       }
     },
     deleteItem(index) {
@@ -74,10 +97,13 @@ export default {
         this.$el.querySelector('.slider-values div:nth-child(' + (index + 1) + ')').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     },
-    updateLastItemPrice() {
-      const index = this.sliderValues.findIndex(value => value === this.lastItem.price);
-      if (index !== -1) {
-        this.$el.querySelector('.slider-values div:nth-child(' + (index + 1) + ')').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    updateLastItemPrice(index) {
+      if (index !== undefined) {
+        this.items[index].price = this.lastItem.price;
+      }
+      const index2 = this.sliderValues.findIndex(value => value === this.lastItem.price);
+      if (index2 !== -1) {
+        this.$el.querySelector('.slider-values div:nth-child(' + (index2 + 1) + ')').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     }
   }
@@ -96,29 +122,37 @@ export default {
   color: #181818;
   border-radius: 12px;
   padding: 12px;
+  gap: 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .slider-container {
   position: relative;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  .slider-values {
+    transition: all 1s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 25px;
+    width: 50px;
+    overflow: hidden;
+  }
 }
 
-.slider-values {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  transition: all 1s ease;
+.name-container{
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: auto;
-  height: 25px;
-  width: 50px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: white;
+  gap: 12px;
+  .counter{
+    padding: 3px 8px;
+  }
+  :last-child{
+    padding: 3px 8px;
+    border: #181818 solid 1px;
+  }
 }
 
 .slider-values div {
@@ -132,14 +166,12 @@ export default {
   color: black;
 }
 
-.last-item-container {
-  border-top: 1px solid #ccc;
-  padding-top: 12px;
-  margin-top: 12px;
-}
-
 button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.block-2 .slider-values {
+  display: none;
 }
 </style>
