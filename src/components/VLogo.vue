@@ -1,9 +1,11 @@
 <script setup>
-
+import icon from './icons/icon.svg'
 </script>
 
 <template>
-  <div></div>
+  <div>
+    <icon></icon>
+  </div>
 </template>
 
 <style scoped>
