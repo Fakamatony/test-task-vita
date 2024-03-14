@@ -1,30 +1,44 @@
 <template>
   <div id="app">
     <div class="block-1">
-      <h2>Add Elements</h2>
+      <VLogo/>
       <div class="slider-container">
-        <p>Установите цену товара:</p>
-        <div class="slider-values">
-          <div v-for="value in sliderValues" :key="value" :class="{ active: value === newItem.price }">{{ value }}</div>
-          <p>P</p>
+        <p class="price">Установите цену товара:</p>
+        <div class="roller">
+          <div class="slider-values">
+            <div v-for="value in sliderValues" :key="value" :class="{ active: value === newItem.price }">{{ value }}</div>
+          </div>
+          <p>₽</p>
         </div>
+
         <input type="range" v-model.number="newItem.price" min="0" max="500" step="50" @input="updateSliderValue">
       </div>
+      <p class="price">Список добавленных товаров</p>
       <div class="name-container">
+
         <p class="counter">{{items.length + 1}}.</p>
-        <input v-model="newItem.name" placeholder="Name">
-        <div>{{newItem.price}} P</div>
+        <input class="name-input" v-model="newItem.name" placeholder="Введите название">
+        <div>{{newItem.price}} ₽</div>
       </div>
-      <button @click="addItem" :disabled="!newItem.name.trim() || newItem.price === 0">Add</button>
+      <button class="blue-btn" @click="addItem" :disabled="!newItem.name.trim() || newItem.price === 0">
+        <span class="add">Добавить товар</span>
+        <img src="./components/icons/plus-icon.svg" alt="+">
+      </button>
     </div>
     <div class="block-2">
-      <h2>Elements List</h2>
+      <VLogo/>
       <div v-if="items.length > 0" class="last-item-container">
-        <h3>Last Item</h3>
+        <p class="price">Установите цену товара:</p>
+        <p>{{ lastItem.name }}</p>
+        <div class="roller">
+          <div class="slider-values">
+            <div v-for="value in sliderValues" :key="value" :class="{ active: value === newItem.price }">{{ value }}</div>
+          </div>
+          <p>₽</p>
+        </div>
         <div class="slider-container">
           <input type="range" v-model.number="lastItem.price" min="0" max="500" step="50" @input="updateLastItemPrice">
         </div>
-        <p>{{ lastItem.name }} - {{ lastItem.price }}</p>
         <button @click="deleteItem(items.length - 1)">Delete</button>
       </div>
       <ol>
@@ -39,7 +53,10 @@
 </template>
 
 <script>
+import VLogo from "@/components/VLogo.vue";
+
 export default {
+  components: {VLogo},
   data() {
     return {
       newItem: {
@@ -113,6 +130,7 @@ export default {
 <style>
 #app{
   gap: 10px;
+  font-family: "Lato", sans-serif;
 }
 
 .block-1, .block-2 {
@@ -132,26 +150,85 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  .roller{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap:12px;
+
+    :last-child{
+      font-size: 32px;
+    }
+  }
   .slider-values {
     transition: all 1s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
     height: 25px;
-    width: 50px;
+    width: max-content;
     overflow: hidden;
+    &>*{
+      font-size: 32px;
+
+    }
+  }
+}
+.price{
+  font-size: 15px;
+  color: #78909C;
+  font-weight: 500;
+}
+.name-container{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .counter{
+    font-size: 12px;
+  }
+  :last-child{
+    padding: 2px 8px;
+    border: 1px solid #00BCD4;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #78909C;
+    font-weight: 300;
   }
 }
 
-.name-container{
+.blue-btn{
+  background: linear-gradient(180deg, #4FC3F7 0%, #2979FF 100%);
+  width: 162px;
+  height: 34px;
+  outline: none;
+  border: none;
+  border-radius: 36px;
   display: flex;
-  gap: 12px;
-  .counter{
-    padding: 3px 8px;
+  align-items: center;
+  justify-content: space-evenly;
+  margin-left: auto;
+  .add{
+    color: #FFFFFF;
+    font-size: 15px;
+    font-weight: 300;
   }
-  :last-child{
-    padding: 3px 8px;
-    border: #181818 solid 1px;
+
+}
+
+.name-input{
+  outline: none;
+  border: 1px solid #00BCD4;
+  border-radius: 6px;
+  padding: 3px 6px;
+  height: 24px;
+  text-align: left;
+  width: 237px;
+  &::placeholder{
+    font-family: "Lato", sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    color: #78909C;
+    line-height: 1;
   }
 }
 
